@@ -14,7 +14,6 @@ def load_rows():
     out=[]
     for r in rows:
         try:
-            if r['date']<START: continue
             x={k:float(r[k]) for k in ('open','high','low','close','volume','foreign_net','institution_net')}
             if not (x['low']<=x['open']<=x['high'] and x['low']<=x['close']<=x['high'] and x['volume']>=0): raise ValueError('OHLC inconsistent')
             x['date']=r['date']; out.append(x)
@@ -34,7 +33,12 @@ def compute(rows):
     base=load_reference(); cash=float(INITIAL); shares=0; cost=0.; peak_close=None; half_taken=False
     entry_pending=False; add_pending=False; exit_pending=False; logs=[]; equity=[]; close_history=[]; last5=[]; first_entry=None
     notes=[]; last_date=base['date']; benchmark_shares=0; benchmark_cash=INITIAL; benchmark_started=False
-    for idx,r in enumerate(rows[:20]):
+    study_rows=[r for r in rows if r['date']>=START][:20]
+    warmup=[r for r in rows if r['date']<START]
+    if study_rows and len(warmup)<20: raise ValueError('MA20 warm-up requires 20 verified earlier trading sessions')
+    close_history=[r['close'] for r in warmup]
+    last5=warmup[-4:]
+    for idx,r in enumerate(study_rows):
         day=r['date']; last_date=day; o,h,l,c=(r[k] for k in ('open','high','low','close'))
         # Benchmark: fixed 5m exposure, opening price on first observation.
         if not benchmark_started:
@@ -66,7 +70,7 @@ def compute(rows):
                 px=o if o<stop else stop
                 cash+=shares*px*(1-FEE-TAX)
                 logs.append({'date':day,'action':'SELL','price':round(px,2),'qty':shares,'reason':'-7% 손절 (보수적 우선 체결)','cash':round(cash)})
-                shares=0; cost=0; exit_pending=False
+                shares=0; cost=0; exit_pending=False; add_pending=False
             elif not half_taken and h>=cost*1.10:
                 qty=max(1,shares//2); px=cost*1.10
                 cash+=qty*px*(1-FEE-TAX); shares-=qty; half_taken=True
@@ -80,24 +84,24 @@ def compute(rows):
             if half_taken and c<=peak_close*.95: exit_pending=True
             # v1.0 add-on only when close +3%, above MA20 and both flows positive; executes next open.
             # Add-on is not evaluated unless 20 actual observed closes exist.
-            if ma is not None and flow_ok and c>ma and c>=cost*1.03 and shares*cost < INITIAL*.50 and not half_taken:
+            if idx<19 and ma is not None and flow_ok and c>ma and c>=cost*1.03 and shares*cost < INITIAL*.50 and not half_taken:
                 add_pending=True
         elif not first_entry:
             # Entry: today's close strictly ABOVE fixed 8,520 and rolling 5d flows each positive.
-            if c>8520 and flow_ok: entry_pending=True
+            if idx<19 and c>8520 and flow_ok: entry_pending=True
         portfolio=cash+shares*c
         benchmark=benchmark_cash+benchmark_shares*c
         equity.append({'date':day,'equity':round(portfolio),'cash':round(cash),'shares':shares,'close':c,'benchmark':round(benchmark),'ma20':round(ma,2) if ma else None,'flow5_ok':flow_ok})
     # Fixed 20-session horizon: liquidation at last close, explicitly marked as close-price assumption.
-    if len(rows)>=20 and shares:
-        r=rows[19]; px=r['close']; cash+=shares*px*(1-FEE-TAX)
+    if len(study_rows)>=20 and shares:
+        r=study_rows[19]; px=r['close']; cash+=shares*px*(1-FEE-TAX)
         logs.append({'date':r['date'],'action':'SELL','price':px,'qty':shares,'reason':'20거래일 종료 종가 가상청산','cash':round(cash)})
         shares=0; equity[-1]['equity']=round(cash); equity[-1]['cash']=round(cash); equity[-1]['shares']=0
     peaks=[]; maxdd=0
     for e in equity:
         peaks.append(max(e['equity'],peaks[-1] if peaks else INITIAL))
         maxdd=min(maxdd,e['equity']/peaks[-1]-1)
-    return {'version':'1.0','ticker':TICKER,'name':'아이마켓코리아','start':START,'last_date':last_date,'status':('관찰 종료' if len(rows)>=20 else '보유' if shares else '진입 대기' if not first_entry else '청산 후 관찰'),'initial':INITIAL,'cash':round(cash),'shares':shares,'equity':equity[-1]['equity'] if equity else INITIAL,'return_pct':round(((equity[-1]['equity'] if equity else INITIAL)/INITIAL-1)*100,3),'max_drawdown_pct':round(maxdd*100,3),'benchmark_equity':equity[-1]['benchmark'] if equity else None,'benchmark_note':'첫 관찰일 시가에 500만원 매수, 나머지 현금; 동일 비용 가정 (최종 매도 비용 미반영)','days':len(equity),'trades':logs,'curve':equity,'notes':notes,'baseline':base,'data_status':'실측 데이터 로드' if equity else '데이터 없음','assumptions':['KRX 일봉과 투자자 순매수 거래대금 사용','동일 일자 손절과 익절 모두 가능하면 손절 우선','장중 손절 갭하락은 시가 체결 가정','시가/종가 주문은 실제 체결가를 보장하지 않음','MA20은 관찰기간 이전 일봉을 사용하지 않아 최초 19일은 미확인','추가매수는 MA20이 확인된 후에만 다음 거래일 시가로 가상 체결']}
+    return {'version':'1.0','ticker':TICKER,'name':'아이마켓코리아','start':START,'last_date':last_date,'status':('관찰 종료' if len(study_rows)>=20 else '보유' if shares else '진입 대기' if not first_entry else '청산 후 관찰'),'initial':INITIAL,'cash':round(cash),'shares':shares,'equity':equity[-1]['equity'] if equity else INITIAL,'return_pct':round(((equity[-1]['equity'] if equity else INITIAL)/INITIAL-1)*100,3),'max_drawdown_pct':round(maxdd*100,3),'benchmark_equity':equity[-1]['benchmark'] if equity else None,'benchmark_note':'첫 관찰일 시가에 500만원 매수, 나머지 현금; 동일 비용 가정 (최종 매도 비용 미반영)','days':len(equity),'trades':logs,'curve':equity,'notes':notes,'baseline':base,'data_status':'실측 데이터 로드' if equity else '데이터 없음','assumptions':['KRX 일봉과 투자자 순매수 거래대금 사용','동일 일자 손절과 익절 모두 가능하면 손절 우선','장중 손절 갭하락은 시가 체결 가정','시가/종가 주문은 실제 체결가를 보장하지 않음','MA20은 관찰 시작 전 검증된 일봉 20개 이상을 포함하여 계산','추가매수는 MA20과 수급이 확인된 후에만 다음 거래일 시가로 가상 체결']}
 
 def main():
     DOCS.mkdir(exist_ok=True)
