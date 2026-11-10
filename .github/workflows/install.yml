@@ -1,1 +1,34 @@
 
+name: Install paper trading site
+
+on:
+  push:
+    paths:
+      - 'imarket-paper-v1.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract project
+        run: |
+          unzip -q -o imarket-paper-v1.zip
+          cp -a imarket-paper/. .
+          rm -rf imarket-paper src/__pycache__
+          git add .github docs src README.md requirements.txt
+
+      - name: Save project files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Install paper trading project"
+            git push
+          fi
+
