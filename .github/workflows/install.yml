@@ -21,7 +21,7 @@ jobs:
           unzip -q -o imarket-paper-v1.zip
           cp -a imarket-paper/. .
           rm -rf imarket-paper src/__pycache__
-          git add .github docs src README.md requirements.txt
+          git add docs src README.md requirements.txt
 
       - name: Save project files
         run: |
