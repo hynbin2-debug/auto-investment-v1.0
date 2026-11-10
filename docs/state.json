@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "ticker": "122900",
+  "name": "아이마켓코리아",
+  "start": "2026-11-11",
+  "last_date": "2026-11-10",
+  "status": "진입 대기",
+  "initial": 10000000,
+  "cash": 10000000,
+  "shares": 0,
+  "equity": 10000000,
+  "return_pct": 0.0,
+  "max_drawdown_pct": 0,
+  "benchmark_equity": null,
+  "benchmark_note": "첫 관찰일 시가에 500만원 매수, 나머지 현금; 동일 비용 가정 (최종 매도 비용 미반영)",
+  "days": 0,
+  "trades": [],
+  "curve": [],
+  "notes": [],
+  "baseline": {
+    "date": "2026-11-10",
+    "close": 8380,
+    "high": 8520,
+    "foreign_5d": 19.6,
+    "institution_5d": 8.86
+  },
+  "data_status": "데이터 없음",
+  "assumptions": [
+    "KRX 일봉과 투자자 순매수 거래대금 사용",
+    "동일 일자 손절과 익절 모두 가능하면 손절 우선",
+    "장중 손절 갭하락은 시가 체결 가정",
+    "시가/종가 주문은 실제 체결가를 보장하지 않음",
+    "MA20은 관찰기간 이전 일봉을 사용하지 않아 최초 19일은 미확인",
+    "추가매수는 MA20이 확인된 후에만 다음 거래일 시가로 가상 체결"
+  ]
+}
