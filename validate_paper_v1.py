@@ -44,7 +44,7 @@ def main():
     check('추가매수: MA20·수급·+3% 다음 시가',len(buys)==2 and buys[1]['date']=='2026-11-14' and buys[1]['price']==8800,str(buys),out)
     # Deliberate difference: 8500*1.03=8755; fee-inclusive cost 8501.275*1.03=8756.31325.
     s=run([base,{'open_':8500,'close':8500,'high':8550,'low':8450},{'close':8756,'high':8800,'low':8700},{'open_':8756,'close':8756,'high':8800,'low':8700}]);buys=trades(s,'BUY')
-    check('합의한 최초 체결가 기준 +3% 경계 8,756원',len(buys)==2,'기대: 추가매수 발생. 실제: '+str(buys),out,known=True)
+    check('합의한 최초 체결가 기준 +3% 경계 8,756원',len(buys)==2,'기대: 추가매수 발생. 실제: '+str(buys),out)
     s=run([base,{'open_':8500,'close':8500,'high':8600,'low':7900}]); sells=trades(s,'SELL')
     check('장중 -7% 손절 전량',len(sells)==1 and sells[0]['qty']==trades(s,'BUY')[0]['qty'] and '손절' in sells[0]['reason'],str(sells),out)
     s=run([base,{'open_':8500,'close':8500,'high':8550,'low':8400},{'open_':7700,'close':7750,'high':7800,'low':7600}]);sells=trades(s,'SELL')
