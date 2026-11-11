@@ -11,7 +11,7 @@
   "equity": 10000000,
   "return_pct": 0.0,
   "max_drawdown_pct": 0,
-  "benchmark_equity": 9981431,
+  "benchmark_equity": 9975491,
   "benchmark_note": "첫 관찰일 시가에 500만원 매수, 나머지 현금; 동일 비용 가정 (최종 매도 비용 미반영)",
   "days": 1,
   "trades": [],
@@ -21,9 +21,9 @@
       "equity": 10000000,
       "cash": 10000000,
       "shares": 0,
-      "close": 8380.0,
-      "benchmark": 9981431,
-      "ma20": 8176.5,
+      "close": 8370.0,
+      "benchmark": 9975491,
+      "ma20": 8176.0,
       "flow5_ok": true
     }
   ],
