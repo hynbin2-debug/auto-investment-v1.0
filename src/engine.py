@@ -31,7 +31,7 @@ def ma20(closes):
 
 def compute(rows):
     base=load_reference(); cash=float(INITIAL); shares=0; cost=0.; peak_close=None; half_taken=False
-    entry_pending=False; add_pending=False; exit_pending=False; logs=[]; equity=[]; close_history=[]; last5=[]; first_entry=None
+    entry_pending=False; add_pending=False; exit_pending=False; logs=[]; equity=[]; close_history=[]; last5=[]; first_entry=None; first_entry_price=None
     notes=[]; last_date=base['date']; benchmark_shares=0; benchmark_cash=INITIAL; benchmark_started=False
     study_rows=[r for r in rows if r['date']>=START][:20]
     warmup=[r for r in rows if r['date']<START]
@@ -52,7 +52,7 @@ def compute(rows):
         if entry_pending and shares==0:
             qty=math.floor((INITIAL*.30)/(o*(1+FEE)))
             if qty>0 and qty*o*(1+FEE)<=cash:
-                cash-=qty*o*(1+FEE); shares=qty; cost=o*(1+FEE); first_entry=day; peak_close=c; half_taken=False
+                cash-=qty*o*(1+FEE); shares=qty; cost=o*(1+FEE); first_entry=day; first_entry_price=o; peak_close=c; half_taken=False
                 logs.append({'date':day,'action':'BUY','price':o,'qty':qty,'reason':'전일 돌파+5일 외국인·기관 순매수 → 익일 시가','cash':round(cash)})
             entry_pending=False
         if add_pending and shares and not half_taken:
@@ -84,7 +84,7 @@ def compute(rows):
             if half_taken and c<=peak_close*.95: exit_pending=True
             # v1.0 add-on only when close +3%, above MA20 and both flows positive; executes next open.
             # Add-on is not evaluated unless 20 actual observed closes exist.
-            if idx<19 and ma is not None and flow_ok and c>ma and c>=cost*1.03 and shares*cost < INITIAL*.50 and not half_taken:
+            if idx<19 and ma is not None and flow_ok and c>ma and c>=first_entry_price*1.03 and shares*cost < INITIAL*.50 and not half_taken:
                 add_pending=True
         elif not first_entry:
             # Entry: today's close strictly ABOVE fixed 8,520 and rolling 5d flows each positive.
