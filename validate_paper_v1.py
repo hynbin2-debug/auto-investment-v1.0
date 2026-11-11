@@ -47,7 +47,7 @@ def main():
     check('합의한 최초 체결가 기준 +3% 경계 8,756원',len(buys)==2,'기대: 추가매수 발생. 실제: '+str(buys),out,known=True)
     s=run([base,{'open_':8500,'close':8500,'high':8600,'low':7900}]); sells=trades(s,'SELL')
     check('장중 -7% 손절 전량',len(sells)==1 and sells[0]['qty']==trades(s,'BUY')[0]['qty'] and '손절' in sells[0]['reason'],str(sells),out)
-    s=run([base,{'open_':7700,'close':8000,'high':8500,'low':7600}]);sells=trades(s,'SELL')
+    s=run([base,{'open_':8500,'close':8500,'high':8550,'low':8400},{'open_':7700,'close':7750,'high':7800,'low':7600}]);sells=trades(s,'SELL')
     check('손절가 아래 갭하락은 시가 체결',len(sells)==1 and sells[0]['price']==7700,str(sells),out)
     s=run([base,{'open_':8500,'close':8500,'high':9600,'low':8400}]); buys=trades(s,'BUY');sells=trades(s,'SELL')
     check('+10% 도달시 절반 익절',len(sells)==1 and '+10%' in sells[0]['reason'] and sells[0]['qty']==max(1,buys[0]['qty']//2),str(sells),out)
