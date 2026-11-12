@@ -3,7 +3,7 @@
   "ticker": "122900",
   "name": "아이마켓코리아",
   "start": "2026-11-11",
-  "last_date": "2026-11-11",
+  "last_date": "2026-11-12",
   "status": "진입 대기",
   "initial": 10000000,
   "cash": 10000000,
@@ -11,9 +11,9 @@
   "equity": 10000000,
   "return_pct": 0.0,
   "max_drawdown_pct": 0,
-  "benchmark_equity": 9975491,
+  "benchmark_equity": 9880451,
   "benchmark_note": "첫 관찰일 시가에 500만원 매수, 나머지 현금; 동일 비용 가정 (최종 매도 비용 미반영)",
-  "days": 1,
+  "days": 2,
   "trades": [],
   "curve": [
     {
@@ -24,6 +24,16 @@
       "close": 8370.0,
       "benchmark": 9975491,
       "ma20": 8176.0,
+      "flow5_ok": true
+    },
+    {
+      "date": "2026-11-12",
+      "equity": 10000000,
+      "cash": 10000000,
+      "shares": 0,
+      "close": 8210.0,
+      "benchmark": 9880451,
+      "ma20": 8182.5,
       "flow5_ok": true
     }
   ],
