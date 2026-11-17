@@ -13,7 +13,7 @@ if state.get("data_status") != "실측 데이터 로드" or journal["source_last
 if not journal["records"]:
     raise SystemExit("No daily records")
 host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-port = int(os.environ.get("SMTP_PORT", "465"))
+port = int(os.environ.get("SMTP_PORT", "587"))
 user = os.environ["SMTP_USER"]
 password = os.environ["SMTP_PASSWORD"]
 recipient = os.environ["REPORT_EMAIL_TO"]
@@ -36,7 +36,10 @@ msg.set_content(
     f"매매 건수(당일): {len(last['trades'])}\n\n"
     "연구용 모의투자이며 실제 주문이 아닙니다.\n"
 )
-with smtplib.SMTP_SSL(host, port, timeout=30) as smtp:
+with smtplib.SMTP(host, port, timeout=30) as smtp:
+    smtp.ehlo()
+    smtp.starttls()
+    smtp.ehlo()
     smtp.login(user, password)
     smtp.send_message(msg)
 print("Daily report sent")
