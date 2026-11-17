@@ -12,7 +12,7 @@ if state.get("data_status") != "실측 데이터 로드" or journal["source_last
     raise SystemExit("Report data is missing or inconsistent")
 if not journal["records"]:
     raise SystemExit("No daily records")
-host = os.environ.get("SMTP_HOST", "smtp.naver.com")
+host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 port = int(os.environ.get("SMTP_PORT", "587"))
 user = os.environ["SMTP_USER"]
 password = os.environ["SMTP_PASSWORD"]
