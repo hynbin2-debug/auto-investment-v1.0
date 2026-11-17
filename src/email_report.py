@@ -12,7 +12,7 @@ if state.get("data_status") != "실측 데이터 로드" or journal["source_last
     raise SystemExit("Report data is missing or inconsistent")
 if not journal["records"]:
     raise SystemExit("No daily records")
-host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+host = os.environ.get("SMTP_HOST", "smtp.naver.com")
 port = int(os.environ.get("SMTP_PORT", "587"))
 user = os.environ["SMTP_USER"]
 password = os.environ["SMTP_PASSWORD"]
@@ -36,39 +36,23 @@ msg.set_content(
     f"매매 건수(당일): {len(last['trades'])}\n\n"
     "연구용 모의투자이며 실제 주문이 아닙니다.\n"
 )
-# Test each advertised password-based AUTH method on a fresh TLS connection.
-# Never log credentials, AUTH payloads, or raw SMTP responses.
-sent = False
-for mechanism in ("PLAIN", "LOGIN"):
-    stage = "connect"
-    try:
-        with smtplib.SMTP(host, port, timeout=30) as smtp:
-            stage = "starttls"
-            smtp.ehlo()
-            smtp.starttls()
-            smtp.ehlo()
-            advertised = smtp.esmtp_features.get("auth", "").upper().split()
-            if mechanism not in advertised:
-                print(f"SMTP AUTH {mechanism}: not advertised; skipped", flush=True)
-                continue
-            smtp.user = user
-            smtp.password = password
-            stage = f"auth_{mechanism.lower()}"
-            auth_handler = smtp.auth_plain if mechanism == "PLAIN" else smtp.auth_login
-            smtp.auth(mechanism, auth_handler)
-            print(f"SMTP AUTH {mechanism}: succeeded", flush=True)
-            stage = "send"
-            smtp.send_message(msg)
-            print("Daily report sent", flush=True)
-            sent = True
-            break
-    except smtplib.SMTPResponseException as exc:
-        print(f"SMTP {mechanism} at {stage}: {type(exc).__name__}; status={exc.smtp_code}", flush=True)
-        if stage == "send":
-            raise SystemExit(1) from None
-    except (smtplib.SMTPException, OSError, TimeoutError) as exc:
-        print(f"SMTP {mechanism} at {stage}: {type(exc).__name__}", flush=True)
-        if stage == "send":
-            raise SystemExit(1) from None
-if not sent:
-    raise SystemExit("SMTP authentication failed for both tested methods")
+# Naver SMTP: STARTTLS and standard SMTP authentication.
+# Do not print credentials or server response text.
+stage = "connect"
+try:
+    with smtplib.SMTP(host, port, timeout=30) as smtp:
+        stage = "starttls"
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        stage = "login"
+        smtp.login(user, password)
+        stage = "send"
+        smtp.send_message(msg)
+except smtplib.SMTPResponseException as exc:
+    print(f"SMTP failed at {stage}: {type(exc).__name__}; status={exc.smtp_code}", flush=True)
+    raise SystemExit(1) from None
+except (smtplib.SMTPException, OSError, TimeoutError) as exc:
+    print(f"SMTP failed at {stage}: {type(exc).__name__}", flush=True)
+    raise SystemExit(1) from None
+print("Daily report sent")
