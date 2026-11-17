@@ -1,0 +1,49 @@
+name: 아이마켓코리아 알림 기능 사전 검증
+
+on:
+  pull_request:
+    paths:
+      - 'src/journal.py'
+      - 'src/email_report.py'
+      - 'docs/index.html'
+      - '.github/workflows/journal-notify.yml'
+      - '.github/workflows/journal-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Python syntax
+        run: python -m py_compile src/journal.py src/email_report.py
+      - name: Generate and verify journal
+        run: |
+          python src/journal.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('docs/state.json').read_text())
+          j=json.loads(Path('docs/journal.json').read_text())
+          assert j['source_last_date']==s['last_date']
+          assert len(j['records'])==len(s['curve'])
+          assert j['records'][-1]['equity']==s['equity']
+          assert j['records'][-1]['shares']==s['shares']
+          assert j['records'][-1]['date']==s['last_date']
+          print('Journal data checks passed')
+          PY
+      - name: Ensure dashboard journal section exists
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html=Path('docs/index.html').read_text()
+          assert 'id="journal"' in html
+          assert "fetch('journal.json?ts='" in html
+          print('Dashboard journal integration present')
+          PY
