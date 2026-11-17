@@ -36,10 +36,29 @@ msg.set_content(
     f"매매 건수(당일): {len(last['trades'])}\n\n"
     "연구용 모의투자이며 실제 주문이 아닙니다.\n"
 )
-with smtplib.SMTP(host, port, timeout=30) as smtp:
-    smtp.ehlo()
-    smtp.starttls()
-    smtp.ehlo()
-    smtp.login(user, password)
-    smtp.send_message(msg)
+# Log only protocol stages and exception classes; never log credentials or server responses.
+stage = "connect"
+try:
+    with smtplib.SMTP(host, port, timeout=30) as smtp:
+        stage = "ehlo_before_tls"
+        smtp.ehlo()
+        print("SMTP connection and initial EHLO succeeded", flush=True)
+        stage = "starttls"
+        smtp.starttls()
+        print("SMTP STARTTLS succeeded", flush=True)
+        stage = "ehlo_after_tls"
+        smtp.ehlo()
+        auth_methods = smtp.esmtp_features.get("auth", "").upper().split()
+        print("SMTP advertised AUTH mechanisms: " + (", ".join(auth_methods) or "none"), flush=True)
+        stage = "login"
+        smtp.login(user, password)
+        print("SMTP authentication succeeded", flush=True)
+        stage = "send"
+        smtp.send_message(msg)
+except smtplib.SMTPResponseException as exc:
+    print(f"SMTP failure at {stage}: {type(exc).__name__}; status={exc.smtp_code}", flush=True)
+    raise SystemExit(1) from None
+except (smtplib.SMTPException, OSError, TimeoutError) as exc:
+    print(f"SMTP failure at {stage}: {type(exc).__name__}", flush=True)
+    raise SystemExit(1) from None
 print("Daily report sent")
