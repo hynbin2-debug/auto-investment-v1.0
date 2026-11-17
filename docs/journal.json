@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "source_last_date": "2026-11-17",
+  "data_status": "실측 데이터 로드",
+  "records": [
+    {
+      "date": "2026-11-11",
+      "decision": "관망",
+      "reason": "진입 기준 종가 8,520원 초과 미충족",
+      "close": 8370.0,
+      "ma20": 8176.0,
+      "flow5_ok": true,
+      "shares": 0,
+      "cash": 10000000,
+      "equity": 10000000,
+      "trades": []
+    },
+    {
+      "date": "2026-11-12",
+      "decision": "관망",
+      "reason": "진입 기준 종가 8,520원 초과 미충족",
+      "close": 8210.0,
+      "ma20": 8182.5,
+      "flow5_ok": true,
+      "shares": 0,
+      "cash": 10000000,
+      "equity": 10000000,
+      "trades": []
+    },
+    {
+      "date": "2026-11-13",
+      "decision": "관망",
+      "reason": "진입 기준 종가 8,520원 초과 미충족",
+      "close": 8350.0,
+      "ma20": 8189.0,
+      "flow5_ok": true,
+      "shares": 0,
+      "cash": 10000000,
+      "equity": 10000000,
+      "trades": []
+    },
+    {
+      "date": "2026-11-16",
+      "decision": "관망",
+      "reason": "진입 기준 종가 8,520원 초과 미충족",
+      "close": 8270.0,
+      "ma20": 8187.5,
+      "flow5_ok": true,
+      "shares": 0,
+      "cash": 10000000,
+      "equity": 10000000,
+      "trades": []
+    },
+    {
+      "date": "2026-11-17",
+      "decision": "관망",
+      "reason": "진입 기준 종가 8,520원 초과 미충족; 외국인·기관 5일 동반 순매수 미충족",
+      "close": 8220.0,
+      "ma20": 8189.0,
+      "flow5_ok": false,
+      "shares": 0,
+      "cash": 10000000,
+      "equity": 10000000,
+      "trades": []
+    }
+  ]
+}
