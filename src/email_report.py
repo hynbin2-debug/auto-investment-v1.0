@@ -36,29 +36,39 @@ msg.set_content(
     f"매매 건수(당일): {len(last['trades'])}\n\n"
     "연구용 모의투자이며 실제 주문이 아닙니다.\n"
 )
-# Log only protocol stages and exception classes; never log credentials or server responses.
-stage = "connect"
-try:
-    with smtplib.SMTP(host, port, timeout=30) as smtp:
-        stage = "ehlo_before_tls"
-        smtp.ehlo()
-        print("SMTP connection and initial EHLO succeeded", flush=True)
-        stage = "starttls"
-        smtp.starttls()
-        print("SMTP STARTTLS succeeded", flush=True)
-        stage = "ehlo_after_tls"
-        smtp.ehlo()
-        auth_methods = smtp.esmtp_features.get("auth", "").upper().split()
-        print("SMTP advertised AUTH mechanisms: " + (", ".join(auth_methods) or "none"), flush=True)
-        stage = "login"
-        smtp.login(user, password)
-        print("SMTP authentication succeeded", flush=True)
-        stage = "send"
-        smtp.send_message(msg)
-except smtplib.SMTPResponseException as exc:
-    print(f"SMTP failure at {stage}: {type(exc).__name__}; status={exc.smtp_code}", flush=True)
-    raise SystemExit(1) from None
-except (smtplib.SMTPException, OSError, TimeoutError) as exc:
-    print(f"SMTP failure at {stage}: {type(exc).__name__}", flush=True)
-    raise SystemExit(1) from None
-print("Daily report sent")
+# Test each advertised password-based AUTH method on a fresh TLS connection.
+# Never log credentials, AUTH payloads, or raw SMTP responses.
+sent = False
+for mechanism in ("PLAIN", "LOGIN"):
+    stage = "connect"
+    try:
+        with smtplib.SMTP(host, port, timeout=30) as smtp:
+            stage = "starttls"
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.ehlo()
+            advertised = smtp.esmtp_features.get("auth", "").upper().split()
+            if mechanism not in advertised:
+                print(f"SMTP AUTH {mechanism}: not advertised; skipped", flush=True)
+                continue
+            smtp.user = user
+            smtp.password = password
+            stage = f"auth_{mechanism.lower()}"
+            auth_handler = smtp.auth_plain if mechanism == "PLAIN" else smtp.auth_login
+            smtp.auth(mechanism, auth_handler)
+            print(f"SMTP AUTH {mechanism}: succeeded", flush=True)
+            stage = "send"
+            smtp.send_message(msg)
+            print("Daily report sent", flush=True)
+            sent = True
+            break
+    except smtplib.SMTPResponseException as exc:
+        print(f"SMTP {mechanism} at {stage}: {type(exc).__name__}; status={exc.smtp_code}", flush=True)
+        if stage == "send":
+            raise SystemExit(1) from None
+    except (smtplib.SMTPException, OSError, TimeoutError) as exc:
+        print(f"SMTP {mechanism} at {stage}: {type(exc).__name__}", flush=True)
+        if stage == "send":
+            raise SystemExit(1) from None
+if not sent:
+    raise SystemExit("SMTP authentication failed for both tested methods")
