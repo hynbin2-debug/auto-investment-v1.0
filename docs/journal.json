@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "source_last_date": "2026-11-19",
+  "source_last_date": "2026-11-20",
   "data_status": "실측 데이터 로드",
   "records": [
     {
@@ -81,6 +81,18 @@
       "reason": "진입 기준 종가 8,520원 초과 미충족; 외국인·기관 5일 동반 순매수 미충족",
       "close": 8250.0,
       "ma20": 8196.0,
+      "flow5_ok": false,
+      "shares": 0,
+      "cash": 10000000,
+      "equity": 10000000,
+      "trades": []
+    },
+    {
+      "date": "2026-11-20",
+      "decision": "관망",
+      "reason": "진입 기준 종가 8,520원 초과 미충족; 외국인·기관 5일 동반 순매수 미충족",
+      "close": 8200.0,
+      "ma20": 8200.5,
       "flow5_ok": false,
       "shares": 0,
       "cash": 10000000,
