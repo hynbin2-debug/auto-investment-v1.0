@@ -3,18 +3,27 @@
   "ticker": "122900",
   "name": "아이마켓코리아",
   "start": "2026-11-11",
-  "last_date": "2026-11-25",
-  "status": "진입 대기",
+  "last_date": "2026-11-27",
+  "status": "보유",
   "initial": 10000000,
-  "cash": 10000000,
-  "shares": 0,
-  "equity": 10000000,
-  "return_pct": 0.0,
+  "cash": 7003271,
+  "shares": 348,
+  "equity": 10016951,
+  "return_pct": 0.17,
   "max_drawdown_pct": 0,
-  "benchmark_equity": 9981431,
+  "benchmark_equity": 10147751,
   "benchmark_note": "첫 관찰일 시가에 500만원 매수, 나머지 현금; 동일 비용 가정 (최종 매도 비용 미반영)",
-  "days": 11,
-  "trades": [],
+  "days": 13,
+  "trades": [
+    {
+      "date": "2026-11-27",
+      "action": "BUY",
+      "price": 8610.0,
+      "qty": 348,
+      "reason": "전일 돌파+5일 외국인·기관 순매수 → 익일 시가",
+      "cash": 7003271
+    }
+  ],
   "curve": [
     {
       "date": "2026-11-11",
@@ -125,6 +134,26 @@
       "benchmark": 9981431,
       "ma20": 8218.0,
       "flow5_ok": true
+    },
+    {
+      "date": "2026-11-26",
+      "equity": 10000000,
+      "cash": 10000000,
+      "shares": 0,
+      "close": 8600.0,
+      "benchmark": 10112111,
+      "ma20": 8242.5,
+      "flow5_ok": true
+    },
+    {
+      "date": "2026-11-27",
+      "equity": 10016951,
+      "cash": 7003271,
+      "shares": 348,
+      "close": 8660.0,
+      "benchmark": 10147751,
+      "ma20": 8268.0,
+      "flow5_ok": false
     }
   ],
   "notes": [],
